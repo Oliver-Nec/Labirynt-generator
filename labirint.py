@@ -3,15 +3,20 @@ import random
 
 pygame.init()
 screen = pygame.display.set_mode((1720, 1720))
+pygame.display.set_caption("Labirint")
 clock = pygame.time.Clock()
 running = True
-
-screen.fill("#968684")
-
+hrac_farba = "#A6A57A"
+screen.fill("#27213C")
+stena_farba = "#A33B20"
 player_position = (163,70)
+player_width = 50
+player_height = 50
+
 end_position = (1570,1480)
 hrac_v = (0,0)
-
+hrac_cesta = []
+hrac_cesta_set = set(hrac_cesta)
 
 def graf_bludiska_list(riadky,stlpce):
     graf = {}
@@ -46,14 +51,15 @@ def nahodna_kostra_grafu(graf,start=(0,0)):
 
 def krabica_bez_vnutra(surface,x,y,x2,y2):
     krab = pygame.Rect(x,y,x2,y2)
-    pygame.draw.rect(surface,"black",krab,width=10)
+    pygame.draw.rect(surface,stena_farba,krab,width=10)
 
-def nakresli_bludisko():
-    global cesty_list
-    global cesty_set
-
+def nove_bludisko():
     cesty_list = nahodna_kostra_grafu(graf_bludiska_list(15,15),(random.randint(0,14),random.randint(0,14)))
     cesty_set = set(cesty_list)
+    return cesty_set
+
+def nakresli_bludisko(bludisko_ktore_nakreslit):
+    cesty_set = bludisko_ktore_nakreslit
     for i in range(15):
         for j in range(14):
             if (((i,j+1),(i,j)) in cesty_set) or (((i,j),(i,j+1)) in cesty_set):
@@ -61,7 +67,7 @@ def nakresli_bludisko():
             else:
                 x_stena = (210+(j*100),20+(i*100))
                 y_stena = (210+(j*100),120+(i*100))
-                pygame.draw.line(screen,"black",x_stena,y_stena, width = 10)
+                pygame.draw.line(screen,stena_farba,x_stena,y_stena, width = 10)
     for i in range(14):
         for j in range(15):
             if (((i+1,j),(i,j)) in cesty_set) or ((((i,j),(i+1,j)) in cesty_set)):
@@ -69,9 +75,10 @@ def nakresli_bludisko():
             else:
                 x_stena = (110+(j*100),120+(i*100))
                 y_stena = (210+(j*100),120+(i*100))
-                pygame.draw.line(screen,"black",x_stena,y_stena, width = 10)
+                pygame.draw.line(screen,stena_farba,x_stena,y_stena, width = 10)
 
-def da_sa(plapla,smer):
+def da_sa(plapla,smer,bludisko):
+    cesty_set = bludisko
     if smer == "d_d":
         if ((plapla,(plapla[0]+1,plapla[1])) in cesty_set) or (((plapla[0]+1,plapla[1]),plapla) in cesty_set):
             return True
@@ -97,23 +104,22 @@ def reset():
     global hrac_v
     global player_position
     global end_position
-    
+    global bludisko 
+    bludisko = nove_bludisko()
+    hrac_cesta.clear()
+    hrac_cesta_set.clear()
     player_position = (163,70)
     end_position = (1570,1480)
     hrac_v = (0,0)
-    screen.fill("#968684")
-    nakresli_bludisko()
+    screen.fill("#27213C")
+    nakresli_bludisko(bludisko)
     krabica_bez_vnutra(screen,110,20,1510,1510)
-    pygame.draw.rect(screen,"green",hracko)
     pygame.draw.circle(screen,"red",end_position,25)
 
 
-hracko = pygame.Rect((player_position[0]-25,player_position[1]-25),(50,50))
-
-pygame.draw.rect(screen,"green",hracko)
 pygame.draw.circle(screen,"red",end_position,25)
-    
-nakresli_bludisko()
+bludisko = nove_bludisko()
+nakresli_bludisko(bludisko)
 krabica_bez_vnutra(screen,110,20,1510,1510)
 while running:
     for event in pygame.event.get():
@@ -121,40 +127,63 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_r:
-                player_position = (163,70)
-                end_position = (1570,1480)
-                hrac_v = (0,0)
-                screen.fill("#968684")
-                nakresli_bludisko()
-                krabica_bez_vnutra(screen,110,20,1510,1510)
-                pygame.draw.rect(screen,"green",hracko)
-                pygame.draw.circle(screen,"red",end_position,25)
+                reset()
             elif event.key == pygame.K_q:
                 running = False
             elif event.key == pygame.K_s:
-                if da_sa(hrac_v,"d_d"):
-                    pygame.draw.line(screen,"green",player_position,(player_position[0],player_position[1]+100), width=10)
-                    player_position = (player_position[0],player_position[1]+100)
+                if da_sa(hrac_v,"d_d",bludisko):
+                    new_player_position = (player_position[0],player_position[1]+100)
+                    normalizovany_seg = (min(player_position,new_player_position),max(player_position,new_player_position))
+
+                    if normalizovany_seg not in hrac_cesta_set:
+                        hrac_cesta.append((player_position,new_player_position))
+                        hrac_cesta_set.add(normalizovany_seg)
+
+                    player_position = new_player_position
                     hrac_v = (hrac_v[0]+1,hrac_v[1])
                 else:
                     pass
             elif event.key == pygame.K_d:
-                if da_sa(hrac_v,"d_p"):
-                    pygame.draw.line(screen,"green",player_position,(player_position[0]+100,player_position[1]), width=10)
-                    player_position = (player_position[0]+100,player_position[1])
+                if da_sa(hrac_v,"d_p",bludisko):
+                    new_player_position = (player_position[0]+100,player_position[1])
+                    normalizovany_seg = (min(new_player_position,player_position),max(new_player_position,player_position))
+
+                    if normalizovany_seg not in hrac_cesta_set:
+                        hrac_cesta.append((player_position,new_player_position))
+                        hrac_cesta_set.add(normalizovany_seg)
+
+
+                    player_position = new_player_position
                     hrac_v = (hrac_v[0],hrac_v[1]+1)
+
             elif event.key == pygame.K_a:
-                if da_sa(hrac_v,"d_l"):
-                    pygame.draw.line(screen,"green",player_position,(player_position[0]-100,player_position[1]), width=10)
-                    player_position = (player_position[0]-100,player_position[1])
-                    hrac_v = (hrac_v[0],hrac_v[1]-1)
+                if da_sa(hrac_v,"d_l",bludisko):
+                   new_player_position = (player_position[0]-100,player_position[1])
+                   normalizovany_seg = (min(new_player_position,player_position),max(new_player_position,player_position))
+                   if normalizovany_seg not in hrac_cesta_set:
+                    hrac_cesta.append((player_position,new_player_position))
+                    hrac_cesta_set.add(normalizovany_seg)
+                
+                player_position = new_player_position
+                hrac_v = (hrac_v[0],hrac_v[1]-1)
+                
+
             elif event.key == pygame.K_w:
-                if da_sa(hrac_v,"d_h"):
-                    pygame.draw.line(screen,"green",player_position,(player_position[0],player_position[1]-100), width=10)
+                if da_sa(hrac_v,"d_h",bludisko):
+                    if (player_position,(player_position[0],player_position[1]-100)) not in hrac_cesta:
+                        hrac_cesta.append((player_position,(player_position[0],player_position[1]-100)))
                     player_position = (player_position[0],player_position[1]-100)
                     hrac_v = (hrac_v[0]-1,hrac_v[1])
+
+    screen.fill("#27213C")
+    nakresli_bludisko(bludisko)
+    krabica_bez_vnutra(screen,110,20,1510,1510)
+    pygame.draw.circle(screen,"red",end_position,25)
+    for i in hrac_cesta:
+        pygame.draw.line(screen,"#9CF6F6",i[0],i[1],width=10)
+    pygame.draw.rect(screen,hrac_farba,[player_position[0]-25,player_position[1]-25,player_width,player_height])
+
     if hrac_v == (14,14):
-        print("vyhral si more")
         reset()
     # RENDER YOUR GAME HERE
 
