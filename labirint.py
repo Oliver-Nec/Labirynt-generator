@@ -191,8 +191,6 @@ while running:
                 running = False
             elif event.key == pygame.K_z:
                 if not animating_solution and not showing_solution:
-                    #global animating_solution, solution_path_to_draw, solution_animation_index, last_animation_time
-
                     cesta_do_cielu = najdi_cestu(bludisko_do_grafu(bludisko,bludisko_velkost,bludisko_velkost),hrac_v,(bludisko_velkost-1,bludisko_velkost-1))
                     
                     if cesta_do_cielu:
