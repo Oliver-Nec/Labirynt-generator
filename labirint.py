@@ -18,7 +18,7 @@ player_position = (player_x_start,player_y_start)
 player_width = 50
 player_height = 50
 level = 1
-jeden_bliplupak = 1500//bludisko_velkost
+jedna_bunka = 1500//bludisko_velkost
 font = pygame.font.Font('freesansbold.ttf', 32)
 text_level = font.render(f"Level: {level}", True, "black")
 text_levelRect = text_level.get_rect()
@@ -132,23 +132,23 @@ def bludisko_do_grafu(bludisko,riadky,stlpce):
     return graf        
 
 def reset(velkost):
-    global hrac_v, player_position, end_position, bludisko, player_y_start, player_x_start, bludisko_velkost, jeden_bliplupak, player_width, player_height
+    global hrac_v, player_position, end_position, bludisko, player_y_start, player_x_start, bludisko_velkost, jedna_bunka, player_width, player_height
     bludisko_velkost = velkost
-    jeden_bliplupak = 1500 // bludisko_velkost
-    player_width = jeden_bliplupak * 0.5
-    player_height = jeden_bliplupak * 0.5
-    player_x_start = 110 + jeden_bliplupak // 2
-    player_y_start = 20 + jeden_bliplupak // 2
+    jedna_bunka = 1500 // bludisko_velkost
+    player_width = jedna_bunka * 0.5
+    player_height = jedna_bunka * 0.5
+    player_x_start = 110 + jedna_bunka // 2
+    player_y_start = 20 + jedna_bunka // 2
     bludisko = nove_bludisko(velkost)
     hrac_cesta.clear()
     hrac_cesta_set.clear()
     player_position = (player_x_start,player_y_start)
-    end_position = (110 + (velkost - 1) * jeden_bliplupak + jeden_bliplupak // 2, 20 + (velkost - 1) * jeden_bliplupak + jeden_bliplupak // 2)
+    end_position = (110 + (velkost - 1) * jedna_bunka + jedna_bunka // 2, 20 + (velkost - 1) * jedna_bunka + jedna_bunka // 2)
     hrac_v = (0,0)
     screen.fill("#27213C")
     nakresli_bludisko(bludisko,bludisko_velkost)
     krabica_bez_vnutra(screen,110,20,1510,1510)
-    pygame.draw.circle(screen,koniec_farba,end_position,jeden_bliplupak//4)
+    pygame.draw.circle(screen,koniec_farba,end_position,jedna_bunka//4)
 
 def najdi_cestu(graf,start,ciel):
     fronta = deque([(start, [start])])
@@ -168,13 +168,13 @@ def najdi_cestu(graf,start,ciel):
 
     return None
 
-def konvertuj_body(bod,player_x_start,player_y_start,jeden_blipak):
-    y = (bod[0]*jeden_blipak) + player_y_start#y
-    x = (bod[1]*jeden_blipak) + player_x_start#x
+def konvertuj_body(bod,player_x_start,player_y_start,bunka):
+    y = (bod[0]*bunka) + player_y_start#y
+    x = (bod[1]*bunka) + player_x_start#x
     return (x,y)
 
 
-pygame.draw.circle(screen,koniec_farba,end_position,jeden_bliplupak//4)
+pygame.draw.circle(screen,koniec_farba,end_position,jedna_bunka//4)
 bludisko = nove_bludisko(bludisko_velkost)
 nakresli_bludisko(bludisko,bludisko_velkost)
 krabica_bez_vnutra(screen,110,20,1510,1510)
@@ -196,7 +196,7 @@ while running:
                     if cesta_do_cielu:
                         solution_path_to_draw.clear()
                         for i in range(len(cesta_do_cielu)-1):
-                            cesta_do_cielu_bod = (konvertuj_body(cesta_do_cielu[i],player_x_start,player_y_start,jeden_bliplupak),konvertuj_body(cesta_do_cielu[i+1],player_x_start,player_y_start,jeden_bliplupak))
+                            cesta_do_cielu_bod = (konvertuj_body(cesta_do_cielu[i],player_x_start,player_y_start,jedna_bunka),konvertuj_body(cesta_do_cielu[i+1],player_x_start,player_y_start,jedna_bunka))
                             solution_path_to_draw.append(cesta_do_cielu_bod)
                         
                         hrac_cesta.clear()
@@ -206,7 +206,7 @@ while running:
                         animating_solution = True
             elif event.key == pygame.K_s:
                 if not showing_solution and not animating_solution and da_sa(hrac_v,"d_d",bludisko):
-                    new_player_position = (player_position[0],player_position[1]+jeden_bliplupak)
+                    new_player_position = (player_position[0],player_position[1]+jedna_bunka)
                     normalizovany_seg = (min(player_position,new_player_position),max(player_position,new_player_position))
 
                     if normalizovany_seg not in hrac_cesta_set:
@@ -219,7 +219,7 @@ while running:
                     pass
             elif event.key == pygame.K_d:
                 if not showing_solution and not animating_solution and da_sa(hrac_v,"d_p",bludisko):
-                    new_player_position = (player_position[0]+jeden_bliplupak,player_position[1])
+                    new_player_position = (player_position[0]+jedna_bunka,player_position[1])
                     normalizovany_seg = (min(new_player_position,player_position),max(new_player_position,player_position))
 
                     if normalizovany_seg not in hrac_cesta_set:
@@ -232,7 +232,7 @@ while running:
 
             elif event.key == pygame.K_a:
                 if not showing_solution and not animating_solution and da_sa(hrac_v,"d_l",bludisko):
-                    new_player_position = (player_position[0]-jeden_bliplupak,player_position[1])
+                    new_player_position = (player_position[0]-jedna_bunka,player_position[1])
                     normalizovany_seg = (min(new_player_position,player_position),max(new_player_position,player_position))
 
                     if normalizovany_seg not in hrac_cesta_set:
@@ -245,7 +245,7 @@ while running:
 
             elif event.key == pygame.K_w:
                 if not showing_solution and not animating_solution and da_sa(hrac_v,"d_h",bludisko):
-                    new_player_position = (player_position[0],player_position[1]-jeden_bliplupak)
+                    new_player_position = (player_position[0],player_position[1]-jedna_bunka)
                     normalizovany_seg = (min(new_player_position,player_position),max(new_player_position,player_position))
                     if normalizovany_seg not in hrac_cesta_set:
                         hrac_cesta.append((player_position,new_player_position))
@@ -276,7 +276,7 @@ while running:
     screen.fill("#27213C")
     nakresli_bludisko(bludisko,bludisko_velkost)
     krabica_bez_vnutra(screen,110,20,1510,1510)
-    pygame.draw.circle(screen,koniec_farba,end_position,jeden_bliplupak//4)
+    pygame.draw.circle(screen,koniec_farba,end_position,jedna_bunka//4)
     for i in hrac_cesta:
         pygame.draw.line(screen,"#9CF6F6",i[0],i[1],width=10)
     pygame.draw.rect(screen,hrac_farba,[player_position[0]-player_width/2,player_position[1]-player_height/2,player_width,player_height])
